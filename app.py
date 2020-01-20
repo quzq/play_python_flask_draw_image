@@ -3,31 +3,52 @@ import zipfile
 from datetime import datetime
 import tempfile
 from PIL import Image, ImageDraw, ImageFont
+import re
 
 app = Flask(__name__)
 
-widthMergin = 20
-heightMergin = 20
+imageFiles = [
+    {'file_name': '1-1.jpg', 'file_path': 'sample/sample2.jpg'},
+    {'file_name': '1-2.jpg', 'file_path': 'sample/sample.jpg'},
+    {'file_name': '1-3.jpg', 'file_path': 'sample/sample2.jpg'},
+    {'file_name': '2-1.jpg', 'file_path': 'sample/sample2.jpg'},
+    {'file_name': '2-2.jpg', 'file_path': 'sample/sample.jpg'},
+    {'file_name': '2-3.jpg', 'file_path': 'sample/sample2.jpg'},
+    {'file_name': '3-1.jpg', 'file_path': 'sample/sample2.jpg'},
+    {'file_name': '3-2.jpg', 'file_path': 'sample/sample.jpg'},
+]
+def getNumberFromStr(str, pos):
+    return int(re.findall(r"[0-9]+", str)[pos]) 
+
+dai_max = max(
+    map(lambda i: getNumberFromStr(i['file_name'],0), imageFiles )
+)
+dan_max = max(
+    map(lambda i: getNumberFromStr(i['file_name'],1), imageFiles )
+)
+print(dai_max, dan_max)
+
+cellSize=200    # 各サムネイルの一辺のサイズ（正方形）
+cellFooterHeight = 30
+cellMergin = 15
 headerHeight = 100  # タイトルの高さ
-imgWidth = 500
-imgHeight = 500
-img = Image.new('RGB', (imgWidth, imgHeight),'white')
+paperWidth = cellSize * dai_max + cellMergin * (dai_max -1) 
+paperHeight = headerHeight + ( cellSize + cellFooterHeight) * dan_max + cellMergin * (dan_max + 1) 
+
+
+img = Image.new('RGB', (paperWidth, paperHeight),'white')
 draw = ImageDraw.Draw(img)  # im上のImageDrawインスタンスを作る
 fnt = ImageFont.truetype('./Kosugi-Regular.ttf',30)
-draw.text((widthMergin,heightMergin),"棚画像一覧", font=fnt, fill=(0,0,0,255))
+draw.text((cellMergin,cellMergin),"棚画像一覧", font=fnt, fill=(0,0,0,255))
 thumbnail = Image.open('sample/sample2.jpg')
 w, h = thumbnail.size
 thumbnail = thumbnail.resize((int(w/20), int(h/20)))
-img.paste(thumbnail, (widthMergin, heightMergin + headerHeight))
+img.paste(thumbnail, (cellMergin, cellMergin + headerHeight))
 
 img.save('index.jpg','JPEG')
  
 @app.route('/', methods=["GET"])
 def hello():
-    imageFiles = [
-        {'file_name': 'sample2.jpg', 'file_path': 'sample/sample2.jpg'},
-        {'file_name': 'sample.jpg', 'file_path': 'sample/sample.jpg'},
-        ]
     # 画像なので圧縮する必要なし
     with tempfile.NamedTemporaryFile(delete=True) as tf:
         with zipfile.ZipFile(tf, "w", compression=zipfile.ZIP_STORED) as new_zip:
