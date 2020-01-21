@@ -38,8 +38,8 @@ paperHeight = headerHeight + ( cellSize + cellFooterHeight) * dan_max + cellMerg
 
 img = Image.new('RGB', (paperWidth, paperHeight),'white')
 draw = ImageDraw.Draw(img)  # im上のImageDrawインスタンスを作る
-fnt = ImageFont.truetype('./Kosugi-Regular.ttf',30)
-draw.text((cellMergin,cellMergin),"棚画像一覧", font=fnt, fill=(0,0,0,255))
+font = ImageFont.truetype('./Kosugi-Regular.ttf',10)
+draw.text((cellMergin,cellMergin),"棚画像一覧", font=font, fill=(0,0,0,255))
 thumbnail = Image.open('sample/sample2.jpg')
 w, h = thumbnail.size
 thumbnail = thumbnail.resize((int(w/20), int(h/20)))
